@@ -6,14 +6,36 @@ output: html_document
 ---
 
 ```{r}
+library(doParallel)
 library(caret)
 library(readr)
+if (!file.exists("pml-training.csv"))
+  download.file("https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv",
+                "pml-training.csv")
 pml.training <- read_csv("./pml-training.csv")
 sumcols <- grep('^(var|avg|max|min|kurtosis|skewness|amplitude|stddev)', colnames(pml.training))
-pml.training <- pml.training[, -sumcols]
-factorcols <- c("user_name", "cvtd_timestamp", "new_window", "classe")
-pml.training[, factorcols] <- lapply(factorcols, function(x) as.factor(pml.training[, x]))
-summary(pml.training)
+pml.training <- pml.training[, -c(1:7, sumcols)]
+pml.training$classe <- as.factor(pml.training$classe)
+
+set.seed(3777)
+inTrain <- createDataPartition(y = pml.training$classe, p = 0.6, list = FALSE)
+training <- pml.training[inTrain, ]
+testing <- pml.training[-inTrain, ]
+
+seeds <- vector(mode = "list", length = 11)
+for (i in 1:10) seeds[[i]] <- sample.int(n = 1000, 51)
+
+seeds[[11]] <- sample.int(1000, 1)
+
+myControl <- trainControl(method = 'cv', seeds = seeds, index = createFolds(training$classe))
+
+cl <- makeCluster(detectCores())
+registerDoParallel(cl)
+# repeated the following with 'gbm' and 'lda' methods, but 'rf' gives the best accuracy
+model <- train(classe ~ ., training, method = 'rf', trControl = myControl)
+stopCluster(cl)
+prediction <- predict(model, testing)
+confusionMatrix(prediction, testing$classe)
 
 ```
 
