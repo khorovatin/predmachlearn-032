@@ -7,7 +7,6 @@ output: html_document
 
 ```{r}
 library(caret)
-library(kernlab)
 library(readr)
 pml.training <- read_csv("./pml-training.csv")
 sumcols <- grep('^(var|avg|max|min|kurtosis|skewness|amplitude|stddev)', colnames(pml.training))
