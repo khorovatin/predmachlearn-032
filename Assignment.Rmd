@@ -1,0 +1,20 @@
+---
+title: "Practical Machine Learning Assignment"
+author: "Ken H."
+date: "September 12, 2015"
+output: html_document
+---
+
+```{r}
+library(caret)
+library(kernlab)
+library(readr)
+pml.training <- read_csv("./pml-training.csv")
+sumcols <- grep('^(var|avg|max|min|kurtosis|skewness|amplitude|stddev)', colnames(pml.training))
+pml.training <- pml.training[, -sumcols]
+factorcols <- c("user_name", "cvtd_timestamp", "new_window", "classe")
+pml.training[, factorcols] <- lapply(factorcols, function(x) as.factor(pml.training[, x]))
+summary(pml.training)
+
+```
+
