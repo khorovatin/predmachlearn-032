@@ -35,7 +35,7 @@ myControl <- trainControl(method = 'cv', seeds = seeds, index = createFolds(trai
 
 cl <- makeCluster(detectCores())
 registerDoParallel(cl)
-# repeated the following with 'gbm' and 'lda' methods, but 'rf' gives the best accuracy
+# repeated the following with 'gbm', 'knn', and 'lda' methods, but 'rf' gives the best accuracy
 system.time(model <- train(classe ~ ., training, method = 'rf', trControl = myControl))
 stopCluster(cl)
 prediction <- predict(model, testing)
